@@ -6,28 +6,42 @@ on:
       - main
 
 jobs:
-  build-and-push:
-    runs-on: self-hosted 
+  build:
+    runs-on: self-hosted
 
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          echo "Building the image"
+          docker build -t todo-app .
+  push:
+    runs-on: self-hosted
+    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Login to Docker Hub
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build Docker image
+          echo "Logging in to Docker Hub"
+          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+      - name: Tag Docker image
         run: |
-          echo "Building the Docker image"
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/todo-app:latest .
-
+          echo "Tagging the image"
+          docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
       - name: Push Docker image to Docker Hub
         run: |
           echo "Pushing the image to Docker Hub"
-          docker pull mahe1kor/todo-app:latest
-          docker run -d -p 8001:8001 mahe1kor/todo-app:latest
-
+          docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+  deploy:
+    runs-on: self-hosted
+    needs: push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Deploy container
         run: |
