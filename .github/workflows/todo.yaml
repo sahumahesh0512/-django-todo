@@ -30,4 +30,4 @@ jobs:
       - name: Deploy container
         run: |
           echo "Deploying the container"
-          # Add your deployment commands here (e.g., kubectl, docker run, etc.)
+          docker run -d -p 8001:8001 mahe1kor/todo-app:latest
