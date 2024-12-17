@@ -16,7 +16,7 @@ jobs:
       - name: Build Docker image
         run: |
           echo "Building the image"
-          docker build -t ${{ secrets.DOCKER_USERNAME }}/todo-app:latest .
+          docker build -t todo-app .
 
   push:
     runs-on: ubuntu-latest
