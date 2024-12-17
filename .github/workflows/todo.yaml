@@ -6,49 +6,26 @@ on:
       - main
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Build Docker image
-        run: |
-          echo "Building the image"
-          docker buildx build --tag todo-app:latest --push .
-
-  push:
-    runs-on: ubuntu-latest
-    needs: build
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: Login to Docker Hub
         run: |
-          echo "Logging in to Docker Hub"
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: Tag Docker image
+      - name: Build Docker image
         run: |
-          echo "Tagging the image"
-          docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+          echo "Building the Docker image"
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/todo-app:latest .
 
       - name: Push Docker image to Docker Hub
         run: |
           echo "Pushing the image to Docker Hub"
           docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
-
-  deploy:
-    runs-on: ubuntu-latest
-    needs: push
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
 
       - name: Deploy container
         run: |
