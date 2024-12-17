@@ -18,15 +18,15 @@ jobs:
           echo "Building the image"
           docker build -t todo-app .
 
-      - name: Save Docker image as an artifact
+      - name: Save Docker image as a tarball
+        run: |
+          docker save todo-app | gzip > todo-app.tar
+
+      - name: Upload Docker image as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: docker-image
-          path: /tmp/todo-app.tar
-
-      - name: Save Docker image as a tarball
-        run: |
-          docker save todo-app | gzip > /tmp/todo-app.tar
+          path: todo-app.tar
 
   push:
     runs-on: ubuntu-latest
@@ -43,7 +43,7 @@ jobs:
       - name: Load Docker image
         run: |
           echo "Loading Docker image"
-          gunzip -c /tmp/todo-app.tar | docker load
+          gunzip -c todo-app.tar | docker load
 
       - name: Login to Docker Hub
         run: |
