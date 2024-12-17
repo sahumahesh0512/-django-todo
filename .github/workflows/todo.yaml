@@ -25,7 +25,9 @@ jobs:
       - name: Push Docker image to Docker Hub
         run: |
           echo "Pushing the image to Docker Hub"
-          docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+          docker pull mahe1kor/todo-app:latest
+          docker run -d -p 8001:8001 mahe1kor/todo-app:latest
+
 
       - name: Deploy container
         run: |
