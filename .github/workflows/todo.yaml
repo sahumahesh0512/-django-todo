@@ -13,20 +13,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Build Docker image
         run: |
           echo "Building the image"
-          docker build -t todo-app .
-
-      - name: Save Docker image as a tarball
-        run: |
-          docker save todo-app | gzip > todo-app.tar
-
-      - name: Upload Docker image as an artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: docker-image
-          path: todo-app.tar
+          docker buildx build --tag todo-app:latest --push .
 
   push:
     runs-on: ubuntu-latest
@@ -35,31 +28,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Download Docker image artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: docker-image
-
-      - name: Load Docker image
-        run: |
-          echo "Loading Docker image"
-          gunzip -c todo-app.tar | docker load
-
       - name: Login to Docker Hub
         run: |
+          echo "Logging in to Docker Hub"
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Tag Docker image
         run: |
           echo "Tagging the image"
           docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
-          docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:${{ github.sha }}
 
       - name: Push Docker image to Docker Hub
         run: |
           echo "Pushing the image to Docker Hub"
           docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
-          docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
