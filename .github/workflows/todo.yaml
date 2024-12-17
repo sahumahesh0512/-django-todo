@@ -46,4 +46,4 @@ jobs:
       - name: Deploy container
         run: |
           echo "Deploying the container"
-          docker run -d -p 8000:8000 mahe1kor/todo-app:latest
+          docker run -d -p 8002:8002 mahe1kor/todo-app:latest
