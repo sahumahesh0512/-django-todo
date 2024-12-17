@@ -27,12 +27,20 @@ jobs:
 
       - name: Login to Docker Hub
         run: |
+          echo "Logging in to Docker Hub"
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Tag Docker image
+        run: |
+          echo "Tagging the image"
+          docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+          docker tag todo-app:latest ${{ secrets.DOCKER_USERNAME }}/todo-app:${{ github.sha }}
 
       - name: Push Docker image to Docker Hub
         run: |
           echo "Pushing the image to Docker Hub"
           docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/todo-app:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
